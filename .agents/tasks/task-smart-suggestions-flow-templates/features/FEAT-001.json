@@ -1,0 +1,35 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Phase 1 - Smart Suggestions: Add time-based contextual suggestion cards (Morning 05:00-09:59 and Night 20:00-02:00) that display above the existing home view content. Morning card shows wellness tips with Quick Routine/Full Routine/Customize buttons. Night card shows step-by-step pre-sleep cards with Start Yog Nidra/Customize buttons. Cards are dismissible and the existing Custom Flow (feeling selection) remains untouched below.",
+  "status": "in_progress",
+  "steps": [
+    "Step 1: In the JavaScript section (around line 560 in the <script> tag), add a function getTimeOfDay() that returns 'morning' (05:00-09:59), 'night' (20:00-02:00), or 'other' based on current hour using new Date().getHours().",
+    "Step 2: Add a new HTML section inside view-home (div id='view-home'), placed AFTER the heading div (h1 'Mental Reset') but BEFORE the 'Gentle Smile Reminder Card'. This section will have id='smart-suggestion-container' and will be conditionally populated by JavaScript.",
+    "Step 3: Create a function renderSmartSuggestion() that checks getTimeOfDay() and renders the appropriate card into #smart-suggestion-container. If 'other', the container should be empty/hidden.",
+    "Step 4: For the MORNING card, create a styled card (using existing bg-[#f2ebe1] pattern or similar warm tone) containing: greeting 'Good Morning' with sun emoji, bullet list of tips (walk 2-5 mins, wash face, drink water), prompt text 'Ready to continue with a Morning Reset?', and three buttons: 'Quick Routine', 'Full Routine', 'Customize'. Include a dismiss X button in the top-right corner.",
+    "Step 5: For the NIGHT card, create a styled card (dark/calming tones like bg-[#2a3345] or similar) containing: header 'Preparing for sleep?' with moon emoji, then 4 sub-cards displayed vertically: Card 1 'Do your duties', Card 2 'Oil your hair', Card 3 pen/notebook journaling card (with the exact text from the spec about writing thoughts, worries, ideas and noting 3 important things for tomorrow), Card 4 'Drink a glass of milk'. Final prompt about beginning Yog Nidra practice. Two buttons: 'Start Yog Nidra', 'Customize'. Include a dismiss X button.",
+    "Step 6: Add dismiss functionality - when user clicks the X button, hide the suggestion card for the current session (use a flag in appState like 'suggestionDismissed'). The card should reappear on next page load/session.",
+    "Step 7: Call renderSmartSuggestion() inside the window.onload function (after existing initialization) and also whenever switchTab('reset') is called to ensure the card appears when returning to home.",
+    "Step 8: Ensure the existing feeling selection buttons (overthinking, decision fatigue, etc.) remain fully functional and visible below the suggestion card. No changes to the timer architecture."
+  ],
+  "acceptance_criteria": [
+    "Morning suggestion card appears when browser time is between 05:00-09:59 AM",
+    "Night suggestion card appears when browser time is between 08:00 PM-02:00 AM (hours 20-23 and 0-1)",
+    "No suggestion card appears at other times",
+    "Morning card displays exact content specified: greeting, 3 bullet tips, 3 buttons (Quick Routine, Full Routine, Customize)",
+    "Night card displays exact content: 4 numbered pre-sleep step cards with specified text, 2 buttons (Start Yog Nidra, Customize)",
+    "Cards can be dismissed with an X button, dismissed state persists for current session only",
+    "Existing feeling selection (overthinking, decision fatigue, etc.) remains fully functional below the card",
+    "No changes to the timer architecture or practice engine",
+    "Card styling follows existing design system (Tailwind classes, sage/sand colors, rounded cards)"
+  ],
+  "verification": [
+    "Open index.html in browser and verify the suggestion card renders (may need to temporarily set time for testing)",
+    "Verify dismiss button hides the card",
+    "Verify clicking feeling selection buttons still navigates to recommendations view",
+    "Check that the JavaScript has no console errors by opening browser dev tools"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
