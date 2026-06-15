@@ -2,260 +2,1090 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Web Alarm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mental Reset Companion</title>
+    <!-- Google Fonts: Inter and Playfair Display for elegant, premium feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS for modern layout defaults -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        sage: {
+                            50: '#f4f6f5',
+                            100: '#e3e8e6',
+                            200: '#c7d2cd',
+                            500: '#5c7a6e',
+                            600: '#4d6a5e',
+                            700: '#3e564c',
+                            800: '#32453d',
+                            900: '#2a3933',
+                        },
+                        sand: {
+                            50: '#faf8f5',
+                            100: '#f5f0e9',
+                            200: '#ebdfd0',
+                            300: '#decbb4',
+                            800: '#4a3f35',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #6366f1;
-            --accent-hover: #4f46e5;
-            --danger: #ef4444;
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #faf8f5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c7d2cd;
+            border-radius: 10px;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
+        /* Smooth transition utility classes */
+        .fade-transition {
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        .page-enter {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        .page-enter-active {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .alarm-container {
-            background-color: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
+        /* Breathing Circle Custom Transitions */
+        .breath-circle {
+            transition: transform 4s cubic-bezier(0.42, 0, 0.58, 1);
+        }
+        .breath-circle.inhale-active {
+            transform: scale(1.6);
+        }
+        .breath-circle.exhale-active {
+            transition: transform 6s cubic-bezier(0.42, 0, 0.58, 1);
+            transform: scale(1.0);
         }
 
-        h1 {
-            margin-top: 0;
-            font-size: 1.5rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        /* SO-HUM Breathing Custom Transitions */
+        .sohum-circle {
+            transition: transform 4s cubic-bezier(0.42, 0, 0.58, 1);
+        }
+        .sohum-circle.inhale-active {
+            transform: scale(1.5);
+        }
+        .sohum-circle.exhale-active {
+            transition: transform 4s cubic-bezier(0.42, 0, 0.58, 1);
+            transform: scale(1.0);
         }
 
-        .clock {
-            font-size: 3.5rem;
-            font-weight: bold;
-            margin: 1.5rem 0;
-            font-family: monospace;
-            color: var(--accent);
-            text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+        /* Pulse and flow visuals */
+        @keyframes soft-pulse {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.04); }
         }
-
-        .inputs {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        input[type="time"] {
-            background-color: var(--bg-color);
-            border: 2px solid #334155;
-            color: var(--text-main);
-            padding: 0.75rem;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-family: monospace;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        input[type="time"]:focus {
-            border-color: var(--accent);
-        }
-
-        button {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-
-        button:hover {
-            background-color: var(--accent-hover);
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        button.stop-btn {
-            background-color: var(--danger);
-            display: none;
-        }
-
-        button.stop-btn:hover {
-            background-color: #dc2626;
-        }
-
-        .status {
-            margin-top: 1rem;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            min-height: 1.5rem;
-        }
-
-        /* Subtle pulse animation for when the alarm goes off */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4); }
-            100% { transform: scale(1); }
-        }
-
-        .ringing {
-            animation: pulse 1s infinite;
-            border: 2px solid var(--danger);
+        .animate-soft-pulse {
+            animation: soft-pulse 4s infinite ease-in-out;
         }
     </style>
 </head>
-<body>
+<body class="bg-[#1e2522] text-stone-800 min-h-screen flex justify-center items-stretch font-sans antialiased overflow-x-hidden">
 
-    <div class="alarm-container" id="alarmContainer">
-        <h1>Alarm Clock</h1>
-        <div class="clock" id="current-time">00:00:00</div>
+    <!-- Main device simulator wrapper (locks to mobile dimension on desktop, native layout on mobile) -->
+    <div class="w-full max-w-md bg-sand-50 shadow-2xl flex flex-col justify-between relative min-h-screen border-x border-stone-800/20 overflow-hidden">
+        
+        <!-- Header area -->
+        <header class="pt-6 px-6 pb-2 flex justify-between items-center bg-sand-50/80 backdrop-blur z-20 sticky top-0 border-b border-sand-100">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-sage-500 animate-pulse"></span>
+                <span class="text-xs uppercase tracking-widest text-sage-600 font-medium">Reset Companion</span>
+            </div>
+            <!-- Interactive state indicator -->
+            <div id="status-bubble" class="text-[11px] bg-sage-100 text-sage-700 px-2 py-0.5 rounded-full font-medium transition-all duration-300">
+                Offline Ready
+            </div>
+        </header>
 
-        <div class="inputs">
-            <input type="time" id="alarm-time" required>
-            <button id="action-btn" onclick="toggleAlarm()">Set Alarm</button>
+        <!-- Main Content Area with native-feel scrolling -->
+        <main class="flex-1 overflow-y-auto px-6 py-4 pb-24 relative" id="scroll-container">
+            
+            <!-- VIEW: Home (Reset Choice) -->
+            <div id="view-home" class="fade-transition space-y-6">
+                <div class="text-center pt-2">
+                    <h1 class="font-serif text-3xl text-sage-900 font-normal leading-tight">Mental Reset</h1>
+                    <p class="text-stone-500 mt-1.5 text-sm">Take a moment to check in with yourself.</p>
+                </div>
+
+                <!-- Gentle Smile Reminder Card -->
+                <div class="bg-[#f2ebe1] border border-sand-200 rounded-2xl p-5 space-y-3 relative overflow-hidden transition-all duration-300 hover:shadow-sm">
+                    <div class="absolute right-[-10px] top-[-10px] opacity-10 text-sage-800 pointer-events-none">
+                        <svg width="100" height="100" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14H11V15H13V16zm0-3H11V7H13V13Z"/>
+                        </svg>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">✨</span>
+                        <h3 class="font-medium text-sage-900 text-sm tracking-wide">A Gentle Reminder</h3>
+                    </div>
+                    <p class="text-stone-600 text-[13.5px] leading-relaxed">
+                        Take a small moment to soften your face and offer yourself a gentle smile. Even a slight smile can help your mind and body relax for a moment.
+                    </p>
+                    <p class="text-stone-500 text-[12.5px] italic leading-relaxed pt-1 border-t border-sand-300/60">
+                        You're already doing something kind for yourself by pausing here. Choose what feels right, and we'll guide you through a quick reset.
+                    </p>
+                </div>
+
+                <!-- Feeling selection prompt -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-semibold tracking-wider text-stone-400 uppercase">How are you feeling right now?</h4>
+                    <div class="grid grid-cols-1 gap-2.5">
+                        <button onclick="selectState('overthinking')" class="group flex items-center justify-between p-4 bg-white border border-stone-100 rounded-xl hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all duration-200 text-left shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl group-hover:scale-110 transition-transform duration-200">🌀</span>
+                                <div>
+                                    <p class="font-medium text-stone-800 text-sm">Overthinking</p>
+                                    <p class="text-[11.5px] text-stone-400">Mind running in frantic circles</p>
+                                </div>
+                            </div>
+                            <span class="text-stone-300 group-hover:translate-x-0.5 transition-transform">→</span>
+                        </button>
+
+                        <button onclick="selectState('decision-fatigue')" class="group flex items-center justify-between p-4 bg-white border border-stone-100 rounded-xl hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all duration-200 text-left shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl group-hover:scale-110 transition-transform duration-200">🧠</span>
+                                <div>
+                                    <p class="font-medium text-stone-800 text-sm">Decision Fatigue</p>
+                                    <p class="text-[11.5px] text-stone-400">Exhausted from constant choices</p>
+                                </div>
+                            </div>
+                            <span class="text-stone-300 group-hover:translate-x-0.5 transition-transform">→</span>
+                        </button>
+
+                        <button onclick="selectState('endless-scrolling')" class="group flex items-center justify-between p-4 bg-white border border-stone-100 rounded-xl hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all duration-200 text-left shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl group-hover:scale-110 transition-transform duration-200">📱</span>
+                                <div>
+                                    <p class="font-medium text-stone-800 text-sm">Endless Scrolling</p>
+                                    <p class="text-[11.5px] text-stone-400">Trapped in visual or media fatigue</p>
+                                </div>
+                            </div>
+                            <span class="text-stone-300 group-hover:translate-x-0.5 transition-transform">→</span>
+                        </button>
+
+                        <button onclick="selectState('low-energy')" class="group flex items-center justify-between p-4 bg-white border border-stone-100 rounded-xl hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all duration-200 text-left shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl group-hover:scale-110 transition-transform duration-200">🔋</span>
+                                <div>
+                                    <p class="font-medium text-stone-800 text-sm">Low Energy</p>
+                                    <p class="text-[11.5px] text-stone-400">Drained, sluggish, or disconnected</p>
+                                </div>
+                            </div>
+                            <span class="text-stone-300 group-hover:translate-x-0.5 transition-transform">→</span>
+                        </button>
+
+                        <button onclick="selectState('just-reset')" class="group flex items-center justify-between p-4 bg-white border border-stone-100 rounded-xl hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all duration-200 text-left shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl group-hover:scale-110 transition-transform duration-200">✨</span>
+                                <div>
+                                    <p class="font-medium text-stone-800 text-sm">Just Need a Reset</p>
+                                    <p class="text-[11.5px] text-stone-400">A quick pause to ground yourself</p>
+                                </div>
+                            </div>
+                            <span class="text-stone-300 group-hover:translate-x-0.5 transition-transform">→</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: Recommendations -->
+            <div id="view-recommendations" class="fade-transition hidden space-y-6">
+                <div class="flex items-center gap-2 pt-2">
+                    <button onclick="navigateHome()" class="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-stone-100 text-stone-500 hover:text-stone-800 active:scale-90 transition-all">
+                        ←
+                    </button>
+                    <span class="text-xs uppercase tracking-widest text-stone-400 font-medium">Reset Options</span>
+                </div>
+
+                <div class="space-y-1">
+                    <h2 class="font-serif text-2xl text-sage-900" id="recommendation-title">Recommendations</h2>
+                    <p class="text-xs text-stone-500 leading-relaxed" id="recommendation-desc">We recommend starting with these quick exercises to re-center.</p>
+                </div>
+
+                <!-- Dynamic container for recommendation cards -->
+                <div id="recommendations-container" class="space-y-3">
+                    <!-- Script will inject list items here -->
+                </div>
+            </div>
+
+            <!-- VIEW: Practice Active -->
+            <div id="view-practice" class="fade-transition hidden space-y-6 flex flex-col justify-between min-h-[70vh]">
+                
+                <!-- Practice Header -->
+                <div class="flex items-center justify-between w-full pt-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+                        <span class="text-xs font-semibold tracking-wider text-stone-400 uppercase" id="practice-status">Active Practice</span>
+                    </div>
+                    <button onclick="abortPractice()" class="text-xs bg-stone-100 hover:bg-stone-200/80 active:scale-95 text-stone-600 px-3 py-1.5 rounded-full transition-all font-medium">
+                        Cancel
+                    </button>
+                </div>
+
+                <!-- Centered Interactive Canvas/Zone -->
+                <div class="flex-1 flex flex-col items-center justify-center py-6 min-h-[340px] relative">
+                    
+                    <!-- Dynamic Breathing Circle Interface (for Deep Breathing and SO-HUM) -->
+                    <div id="interactive-breathing" class="hidden flex flex-col items-center justify-center w-full">
+                        <div class="w-56 h-56 flex items-center justify-center relative">
+                            <!-- Background soft pulse gradient ring -->
+                            <div class="absolute inset-0 rounded-full bg-sage-500/5 blur-xl"></div>
+                            
+                            <!-- Middle visual border ring -->
+                            <div class="absolute inset-4 rounded-full border border-sage-500/10 pointer-events-none"></div>
+
+                            <!-- Expanding breathing controller circle -->
+                            <div id="breathing-node" class="breath-circle w-32 h-32 rounded-full bg-gradient-to-tr from-sage-500 to-sage-600 shadow-lg shadow-sage-500/20 flex flex-col items-center justify-center text-white select-none">
+                                <span class="text-xs opacity-75 font-medium tracking-widest uppercase mb-1" id="breath-label">INHALE</span>
+                                <span class="font-serif text-2xl tracking-wide italic" id="breath-ticker">4s</span>
+                            </div>
+                        </div>
+                        <!-- Current instruction guide -->
+                        <p class="text-sm font-medium text-sage-800 text-center mt-8 px-6 max-w-xs" id="breath-sub-instruction">
+                            Inhale gently.
+                        </p>
+                    </div>
+
+                    <!-- Dynamic Sky Gazing View -->
+                    <div id="interactive-sky" class="hidden flex flex-col items-center justify-center w-full space-y-6">
+                        <div class="w-48 h-48 rounded-full border border-sky-100 bg-sky-50/40 relative flex items-center justify-center overflow-hidden animate-soft-pulse">
+                            <!-- Minimal sky abstract nodes -->
+                            <div class="absolute top-10 w-24 h-12 bg-white/60 blur-md rounded-full"></div>
+                            <div class="absolute bottom-12 w-20 h-10 bg-white/40 blur-lg rounded-full"></div>
+                            <svg class="w-12 h-12 text-sky-400/80" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
+                            </svg>
+                        </div>
+                        <p class="text-stone-600 text-sm text-center max-w-xs leading-relaxed px-4">
+                            Look at the sky, trees, or distant objects. Allow your eyes and mind to soften.
+                        </p>
+                    </div>
+
+                    <!-- Dynamic Walking Meditation View -->
+                    <div id="interactive-walking" class="hidden flex flex-col items-center justify-center w-full space-y-6">
+                        <div class="w-full max-w-xs bg-white/80 border border-sand-200 p-5 rounded-2xl space-y-4 shadow-sm">
+                            <h5 class="text-xs font-semibold tracking-wider text-sage-600 uppercase border-b border-sand-100 pb-2 flex items-center gap-1.5">
+                                <span>🚶</span> Physical Focus Anchors
+                            </h5>
+                            <ul class="space-y-3 text-stone-600 text-sm">
+                                <li class="flex items-start gap-2.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-sage-500 mt-1.5 shrink-0"></span>
+                                    <span>Feel each <strong>foot touching the ground</strong> as you take steps.</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-sage-500 mt-1.5 shrink-0"></span>
+                                    <span>Sync your steps gently with your <strong>breathing rhythm</strong>.</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-sage-500 mt-1.5 shrink-0"></span>
+                                    <span>Observe <strong>surroundings</strong> with curiosities, no labels.</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-sage-500 mt-1.5 shrink-0"></span>
+                                    <span class="text-stone-500 italic">Pocket your phone completely. Let it remain quiet.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Yoga Nidra Rest View -->
+                    <div id="interactive-yoganidra" class="hidden flex flex-col items-center justify-center w-full space-y-6">
+                        <div class="w-48 h-48 rounded-full border border-stone-100 bg-stone-100/30 flex flex-col items-center justify-center relative overflow-hidden animate-soft-pulse">
+                            <span class="text-2xl mb-1">💤</span>
+                            <span class="text-stone-400 font-serif text-sm tracking-wide italic">Rest Deeply</span>
+                        </div>
+                        <div class="text-center space-y-2 max-w-xs px-4">
+                            <h4 class="font-medium text-stone-800 text-sm">Lie down comfortably</h4>
+                            <p class="text-stone-500 text-xs leading-relaxed">
+                                Close your eyes. Drop your weight totally into the floor. Allow your entire nervous system to rest and unplug completely.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Posture Reset View -->
+                    <div id="interactive-posture" class="hidden flex flex-col items-center justify-center w-full space-y-6">
+                        <div class="w-full max-w-xs bg-white/80 border border-sand-200 p-5 rounded-2xl space-y-4 shadow-sm">
+                            <h5 class="text-xs font-semibold tracking-wider text-sage-600 uppercase border-b border-sand-100 pb-2 flex items-center gap-1.5">
+                                <span>🧘‍♀️</span> Posture Realignment
+                            </h5>
+                            <ul class="space-y-3.5 text-stone-600 text-sm">
+                                <li class="flex items-center gap-3">
+                                    <span class="text-base bg-sand-100 w-7 h-7 rounded-full flex items-center justify-center">🪑</span>
+                                    <span>Sit upright and ground your seat.</span>
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-base bg-sand-100 w-7 h-7 rounded-full flex items-center justify-center">🤲</span>
+                                    <span>Drop and relax your shoulders.</span>
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-base bg-sand-100 w-7 h-7 rounded-full flex items-center justify-center">👄</span>
+                                    <span>Unclench your jaw entirely.</span>
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="text-base bg-sand-100 w-7 h-7 rounded-full flex items-center justify-center">💨</span>
+                                    <span>Take one conscious slow breath.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Session Bottom HUD: Countdown timer and metadata -->
+                <div class="space-y-5">
+                    <div class="text-center">
+                        <span class="text-xs uppercase tracking-widest text-stone-400 font-medium block mb-1" id="active-practice-name">Deep Breathing</span>
+                        <div class="font-serif text-4xl text-sage-900 tracking-wider font-light" id="timer-display">
+                            02:00
+                        </div>
+                    </div>
+
+                    <div class="pb-4">
+                        <div class="w-full bg-sand-200 h-1.5 rounded-full overflow-hidden">
+                            <div id="timer-progress-bar" class="bg-sage-500 h-full w-0 transition-all duration-1000 ease-linear"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VIEW: Session Completion -->
+            <div id="view-completion" class="fade-transition hidden space-y-6 text-center py-6">
+                <div class="space-y-3">
+                    <div class="w-16 h-16 bg-sage-100 text-sage-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                        ✓
+                    </div>
+                    <h2 class="font-serif text-2xl text-sage-900 font-normal">Practice Completed</h2>
+                    <p class="text-stone-500 text-sm max-w-xs mx-auto">
+                        Thank you for taking a physical pause for your mind. How does your space feel now?
+                    </p>
+                </div>
+
+                <!-- Feedback Selector (Non-intrusive) -->
+                <div class="bg-white border border-stone-100 p-5 rounded-2xl max-w-xs mx-auto space-y-4 shadow-sm">
+                    <span class="text-xs font-semibold tracking-wider text-stone-400 uppercase">Did this help?</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="submitFeedback('Better')" class="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-stone-100 hover:border-emerald-200 hover:bg-emerald-50/40 active:scale-95 transition-all group">
+                            <span class="text-2xl group-hover:scale-110 transition-transform">🙂</span>
+                            <span class="text-xs font-medium text-stone-600">Better</span>
+                        </button>
+                        <button onclick="submitFeedback('Same')" class="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-stone-100 hover:border-amber-200 hover:bg-amber-50/40 active:scale-95 transition-all group">
+                            <span class="text-2xl group-hover:scale-110 transition-transform">😐</span>
+                            <span class="text-xs font-medium text-stone-600">Same</span>
+                        </button>
+                        <button onclick="submitFeedback('Worse')" class="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-stone-100 hover:border-red-200 hover:bg-red-50/40 active:scale-95 transition-all group">
+                            <span class="text-2xl group-hover:scale-110 transition-transform">☹</span>
+                            <span class="text-xs font-medium text-stone-600">Worse</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="navigateHome()" class="w-full max-w-xs bg-sage-600 text-white font-medium py-3 px-6 rounded-xl hover:bg-sage-700 active:scale-[0.98] transition-all shadow-md shadow-sage-600/10">
+                        Back to Home
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW: Insights -->
+            <div id="view-insights" class="fade-transition hidden space-y-6">
+                <div class="text-center pt-2">
+                    <h1 class="font-serif text-3xl text-sage-900 font-normal">Insights</h1>
+                    <p class="text-stone-500 mt-1.5 text-sm">Your commitment to mind grounding.</p>
+                </div>
+
+                <!-- Highlight Card -->
+                <div class="bg-[#eef2f0] border border-sage-100 rounded-2xl p-5 space-y-2">
+                    <span class="text-[10px] uppercase tracking-widest text-sage-700 font-bold">This Week's Reset Stat</span>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-serif text-sage-900 font-semibold" id="stats-total-sessions">0</span>
+                        <span class="text-xs text-stone-500">completed sessions</span>
+                    </div>
+                    <div class="pt-1.5 border-t border-sage-200/50 flex items-center justify-between text-xs text-stone-600">
+                        <span>Most Helpful Practice:</span>
+                        <span class="font-medium text-sage-800" id="stats-favorite">None yet</span>
+                    </div>
+                </div>
+
+                <!-- Session logs detail breakdown list -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-semibold tracking-wider text-stone-400 uppercase">Practice Breakdowns</h4>
+                        <!-- Clear statistics wrapper option inside setting or reset -->
+                    </div>
+                    
+                    <div class="bg-white border border-stone-100 rounded-xl divide-y divide-stone-50" id="stats-list-container">
+                        <!-- Instantiated dynamically -->
+                        <div class="p-4 text-center text-stone-400 text-xs py-8">
+                            Complete your first reset exercise to unlock your statistics.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Mock Demo Tooltip inside Insights so people can test easily without doing 10 sessions! -->
+                <div id="mock-trigger-container" class="bg-white/40 border border-dashed border-stone-200 p-4 rounded-xl text-center space-y-2">
+                    <p class="text-[11px] text-stone-500">Want to preview full analytics without completing 10 practices?</p>
+                    <button onclick="populateMockData()" class="text-xs bg-sage-100 text-sage-700 font-medium px-3 py-1.5 rounded-lg hover:bg-sage-200 active:scale-95 transition-all">
+                        ⚡ Generate Demo Session History
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW: Settings -->
+            <div id="view-settings" class="fade-transition hidden space-y-6">
+                <div class="text-center pt-2">
+                    <h1 class="font-serif text-3xl text-sage-900 font-normal">Settings</h1>
+                    <p class="text-stone-500 mt-1.5 text-sm">Fine-tune your minimal companion experience.</p>
+                </div>
+
+                <!-- Form Controls -->
+                <div class="bg-white border border-stone-100 rounded-2xl p-4 divide-y divide-stone-100 shadow-sm">
+                    <!-- Toggle Transitions -->
+                    <div class="flex items-center justify-between py-3.5">
+                        <div class="space-y-0.5">
+                            <label class="text-sm font-medium text-stone-800">Visual Animations</label>
+                            <p class="text-[11px] text-stone-400">Enable expanding circles and soft screen fade-ins</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="settings-animations" class="sr-only peer" checked onchange="toggleAnimationsSetting()">
+                            <div class="w-11 h-6 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sage-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Sandbox reset details -->
+                    <div class="flex items-center justify-between py-3.5">
+                        <div class="space-y-0.5">
+                            <label class="text-sm font-medium text-stone-800">Offline Manifest</label>
+                            <p class="text-[11px] text-stone-400">All data remains physically on your device only</p>
+                        </div>
+                        <span class="text-xs text-sage-600 bg-sage-50 border border-sage-100 px-2 py-0.5 rounded-md font-medium">Local Only</span>
+                    </div>
+                </div>
+
+                <!-- Danger Zone Controls -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-semibold tracking-wider text-stone-400 uppercase">Database Control</h4>
+                    <div class="bg-white border border-red-100 rounded-2xl p-4 space-y-3.5 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div class="space-y-0.5">
+                                <label class="text-sm font-medium text-stone-800">Clear Cache & Local Data</label>
+                                <p class="text-[11px] text-stone-400">Irreversibly wipe your practice stats and logs</p>
+                            </div>
+                        </div>
+                        <button onclick="triggerResetAllData()" class="w-full bg-red-50 text-red-600 border border-red-100 font-medium py-2.5 px-4 rounded-xl hover:bg-red-100/50 active:scale-[0.98] transition-all text-xs">
+                            Reset All Local Storage Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- App Info Details -->
+                <div class="text-center space-y-1 py-4 text-stone-400">
+                    <p class="text-xs font-medium">Mental Reset Companion v1.0.0</p>
+                    <p class="text-[10px]">No telemetry • No cloud sync • Pure client-side</p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Fixed Sticky Bottom Navigation Bar -->
+        <nav class="absolute bottom-0 left-0 right-0 h-20 bg-white/95 backdrop-blur-md border-t border-stone-100 flex items-center justify-around px-6 z-30">
+            <button onclick="switchTab('reset')" id="nav-reset" class="flex flex-col items-center gap-1 text-sage-600 font-medium transition-all group active:scale-90">
+                <span class="text-xl transition-transform group-hover:-translate-y-0.5">✨</span>
+                <span class="text-[10px] tracking-wide font-medium">Reset</span>
+            </button>
+            <button onclick="switchTab('insights')" id="nav-insights" class="flex flex-col items-center gap-1 text-stone-400 transition-all group active:scale-90">
+                <span class="text-xl transition-transform group-hover:-translate-y-0.5">📊</span>
+                <span class="text-[10px] tracking-wide font-medium">Insights</span>
+            </button>
+            <button onclick="switchTab('settings')" id="nav-settings" class="flex flex-col items-center gap-1 text-stone-400 transition-all group active:scale-90">
+                <span class="text-xl transition-transform group-hover:-translate-y-0.5">⚙️</span>
+                <span class="text-[10px] tracking-wide font-medium">Settings</span>
+            </button>
+        </nav>
+
+        <!-- Toast Notification system for messages -->
+        <div id="toast-notif" class="absolute top-20 left-6 right-6 bg-stone-900 text-white text-xs py-2.5 px-4 rounded-xl shadow-lg z-50 flex items-center justify-between opacity-0 translate-y-[-10px] pointer-events-none transition-all duration-300">
+            <span id="toast-text">Feedback recorded.</span>
+            <span class="text-[10px] opacity-60">Dismiss</span>
         </div>
 
-        <button id="stop-btn" class="stop-btn" onclick="stopAlarm()">Dismiss Alarm</button>
-
-        <div class="status" id="status-text">No alarm set.</div>
     </div>
 
-    <!-- Web Audio API Synthesizer (No external audio file needed!) -->
+    <!-- Application Logic and Engine -->
     <script>
-        let alarmTime = null;
-        let alarmTimeout = null;
-        let audioCtx = null;
-        let audioInterval = null;
-        let isAlarmSet = false;
+        // System wide constants for mapping state recommendations
+        const STATE_MAPS = {
+            'overthinking': {
+                title: 'Overthinking Reset',
+                desc: 'Your mind is moving rapidly. Let\'s anchor your concentration to bring you back down to the present earth.',
+                practices: ['deep-breathing', 'so-hum', 'sky-gazing']
+            },
+            'decision-fatigue': {
+                title: 'Decision Fatigue',
+                desc: 'Your analytical prefrontal cortex is exhausted. Let\'s shift focus to pure physical and somatic feedback.',
+                practices: ['walking-meditation', 'deep-breathing', 'posture-reset']
+            },
+            'endless-scrolling': {
+                title: 'Endless Scrolling Rescue',
+                desc: 'Your optical nerves and reward pathways are hyper-stimulated. Let\'s expand your gaze and restore visual balance.',
+                practices: ['sky-gazing', 'walking-meditation']
+            },
+            'low-energy': {
+                title: 'Low Energy Reset',
+                desc: 'You feel depleted or mentally foggy. Let\'s complete a somatic posture shift or rest deeply in stillness.',
+                practices: ['walking-meditation', 'posture-reset', 'yoga-nidra']
+            },
+            'just-reset': {
+                title: 'Simple Pause & Ground',
+                desc: 'A pure, restorative pause to ground yourself and bring a gentle space of stillness back to your day.',
+                practices: ['deep-breathing', 'so-hum', 'walking-meditation']
+            }
+        };
 
-        // Update current time every second
-        function updateClock() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            
-            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+        // Complete self-contained exercise library configurations
+        const PRACTICES_DB = {
+            'deep-breathing': {
+                id: 'deep-breathing',
+                name: 'Deep Breathing',
+                duration: '2 min',
+                seconds: 120,
+                desc: '4s Inhale, 6s Exhale to activate your parasympathetic system.'
+            },
+            'so-hum': {
+                id: 'so-hum',
+                name: 'SO-HUM Mantra',
+                duration: '3 min',
+                seconds: 180,
+                desc: 'An ancient silent mental mantra to anchor active internal monologues.'
+            },
+            'sky-gazing': {
+                id: 'sky-gazing',
+                name: 'Sky Gazing',
+                duration: '1 min',
+                seconds: 60,
+                desc: 'Intentionally expand your visual field to calm stress responses.'
+            },
+            'walking-meditation': {
+                id: 'walking-meditation',
+                name: 'Walking Meditation',
+                duration: '2 min',
+                seconds: 120,
+                desc: 'Shift total attention to somatic sensations of movement.'
+            },
+            'yoga-nidra': {
+                id: 'yoga-nidra',
+                name: 'Yoga Nidra Rest',
+                duration: '15 min',
+                seconds: 900,
+                desc: 'An ultra-deep restful state without sleep to quickly restore raw vital energy.'
+            },
+            'posture-reset': {
+                id: 'posture-reset',
+                name: 'Posture Reset',
+                duration: '30 sec',
+                seconds: 30,
+                desc: 'Release physical tension traps in the jaw, neck, and shoulders.'
+            }
+        };
 
-            // Check if alarm time matches current time (ignoring seconds for exact minute trigger)
-            if (isAlarmSet && alarmTime === `${hours}:${minutes}`) {
-                triggerAlarm();
+        // Core App State Configuration
+        let appState = {
+            activeView: 'home', // 'home' | 'recommendations' | 'practice' | 'completion' | 'insights' | 'settings'
+            selectedEmotion: null,
+            activePractice: null,
+            timerRemaining: 0,
+            timerInterval: null,
+            breathPhaseInterval: null,
+            breathPhaseRemaining: 4, // start with 4s inhale
+            breathMode: 'inhale', // 'inhale' | 'exhale'
+            animationsEnabled: true,
+            completedLogItem: null // placeholders for currently concluding session to match with feedback
+        };
+
+        // Tab routing navigator
+        function switchTab(tabId) {
+            abortPractice(); // Safety clear timers
+
+            // Update nav item highlights
+            const tabs = ['reset', 'insights', 'settings'];
+            tabs.forEach(t => {
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (t === tabId) {
+                    navBtn.classList.remove('text-stone-400');
+                    navBtn.classList.add('text-sage-600', 'font-medium');
+                } else {
+                    navBtn.classList.remove('text-sage-600', 'font-medium');
+                    navBtn.classList.add('text-stone-400');
+                }
+            });
+
+            if (tabId === 'reset') {
+                showView('view-home');
+            } else if (tabId === 'insights') {
+                renderInsightsPage();
+                showView('view-insights');
+            } else if (tabId === 'settings') {
+                showView('view-settings');
             }
         }
-        setInterval(updateClock, 1000);
-        updateClock(); // Initial run
 
-        function toggleAlarm() {
-            const timeInput = document.getElementById('alarm-time');
-            const actionBtn = document.getElementById('action-btn');
-            const statusText = document.getElementById('status-text');
+        // Helper: Core state view routing logic with soft crossfade animations
+        function showView(viewId) {
+            const views = ['view-home', 'view-recommendations', 'view-practice', 'view-completion', 'view-insights', 'view-settings'];
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if (v === viewId) {
+                    el.classList.remove('hidden');
+                    if (appState.animationsEnabled) {
+                        el.classList.add('page-enter');
+                        // Trigger micro-layout paint before applying transitions
+                        setTimeout(() => {
+                            el.classList.add('page-enter-active');
+                            el.classList.remove('page-enter');
+                        }, 20);
+                    } else {
+                        el.classList.remove('page-enter', 'page-enter-active');
+                    }
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('page-enter-active');
+                }
+            });
+            // Auto scroll container back to top on transitions
+            document.getElementById('scroll-container').scrollTop = 0;
+        }
 
-            if (!isAlarmSet) {
-                // Setting the alarm
-                if (!timeInput.value) {
-                    statusText.textContent = "Please select a valid time.";
-                    statusText.style.color = "var(--danger)";
-                    return;
+        // Return navigation flows
+        function navigateHome() {
+            abortPractice();
+            switchTab('reset');
+        }
+
+        // Emotion selections and dynamic recommendation render pipeline
+        function selectState(emotionId) {
+            appState.selectedEmotion = emotionId;
+            const mapping = STATE_MAPS[emotionId];
+            if (!mapping) return;
+
+            // Update dynamic text
+            document.getElementById('recommendation-title').textContent = mapping.title;
+            document.getElementById('recommendation-desc').textContent = mapping.desc;
+
+            // Generate recommendation cards programmatically
+            const container = document.getElementById('recommendations-container');
+            container.innerHTML = ''; // clear previous elements
+
+            mapping.practices.forEach(pId => {
+                const practiceData = PRACTICES_DB[pId];
+                if (!practiceData) return;
+
+                const card = document.createElement('div');
+                card.className = "bg-white border border-stone-100 p-5 rounded-2xl flex flex-col justify-between gap-4 shadow-sm hover:border-sage-200 transition-all duration-300";
+                card.innerHTML = `
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-serif text-lg text-sage-900 font-medium">${practiceData.name}</h3>
+                            <span class="text-xs bg-sage-50 text-sage-700 font-medium px-2.5 py-1 rounded-full border border-sage-100/50 flex items-center gap-1">
+                                ⏱ ${practiceData.duration}
+                            </span>
+                        </div>
+                        <p class="text-xs text-stone-500 leading-relaxed">${practiceData.desc}</p>
+                    </div>
+                    <button onclick="startPractice('${pId}')" class="w-full bg-sage-500 hover:bg-sage-600 active:scale-[0.98] text-white text-xs font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-sage-500/10">
+                        Start Practice
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+
+            showView('view-recommendations');
+        }
+
+        // Starting an active session practice view
+        function startPractice(practiceId) {
+            const practice = PRACTICES_DB[practiceId];
+            if (!practice) return;
+
+            appState.activePractice = practice;
+            appState.timerRemaining = practice.seconds;
+            
+            // Format timer values immediately
+            updateTimerDisplay();
+
+            // Set specific practice name banner
+            document.getElementById('active-practice-name').textContent = practice.name;
+
+            // Hide/unhide canvas visual sections based on selected module
+            const subCanvases = {
+                'interactive-breathing': ['deep-breathing', 'so-hum'],
+                'interactive-sky': ['sky-gazing'],
+                'interactive-walking': ['walking-meditation'],
+                'interactive-yoganidra': ['yoga-nidra'],
+                'interactive-posture': ['posture-reset']
+            };
+
+            Object.entries(subCanvases).forEach(([canvasId, matchingIds]) => {
+                const canvasEl = document.getElementById(canvasId);
+                if (matchingIds.includes(practiceId)) {
+                    canvasEl.classList.remove('hidden');
+                } else {
+                    canvasEl.classList.add('hidden');
+                }
+            });
+
+            // Start appropriate engines
+            if (practiceId === 'deep-breathing') {
+                startBreathingEngine(4, 6, "Inhale gently.", "Exhale slowly.");
+            } else if (practiceId === 'so-hum') {
+                startBreathingEngine(4, 4, 'Inhale silently: "SO"', 'Exhale silently: "HUM"', true);
+            } else {
+                // Non breathing structural resets
+                stopBreathingEngine();
+            }
+
+            // Start master countdown loops
+            startMasterTimer(practice.seconds);
+
+            showView('view-practice');
+        }
+
+        // Breathing state visual animation loop handles
+        function startBreathingEngine(inhaleSec, exhaleSec, inhaleTxt, exhaleTxt, isSoHum = false) {
+            stopBreathingEngine(); // safety cleanup
+
+            const breathingNode = document.getElementById('breathing-node');
+            const ticker = document.getElementById('breath-ticker');
+            const label = document.getElementById('breath-label');
+            const subInstruction = document.getElementById('breath-sub-instruction');
+
+            // Reset dynamic variables
+            appState.breathMode = 'inhale';
+            appState.breathPhaseRemaining = inhaleSec;
+
+            // Update DOM initial values
+            label.textContent = isSoHum ? "SO" : "INHALE";
+            ticker.textContent = `${appState.breathPhaseRemaining}s`;
+            subInstruction.textContent = inhaleTxt;
+
+            // Ensure transition classes are initially set correctly
+            if (appState.animationsEnabled) {
+                breathingNode.className = `breath-circle w-32 h-32 rounded-full bg-gradient-to-tr from-sage-500 to-sage-600 shadow-lg shadow-sage-500/20 flex flex-col items-center justify-center text-white select-none inhale-active`;
+            }
+
+            // Breath ticker interval (1 second ticks)
+            appState.breathPhaseInterval = setInterval(() => {
+                appState.breathPhaseRemaining--;
+
+                if (appState.breathPhaseRemaining <= 0) {
+                    // Switch state
+                    if (appState.breathMode === 'inhale') {
+                        appState.breathMode = 'exhale';
+                        appState.breathPhaseRemaining = exhaleSec;
+                        label.textContent = isSoHum ? "HUM" : "EXHALE";
+                        subInstruction.textContent = exhaleTxt;
+                        
+                        if (appState.animationsEnabled) {
+                            breathingNode.classList.remove('inhale-active');
+                            breathingNode.classList.add('exhale-active');
+                        }
+                    } else {
+                        appState.breathMode = 'inhale';
+                        appState.breathPhaseRemaining = inhaleSec;
+                        label.textContent = isSoHum ? "SO" : "INHALE";
+                        subInstruction.textContent = inhaleTxt;
+                        
+                        if (appState.animationsEnabled) {
+                            breathingNode.classList.remove('exhale-active');
+                            breathingNode.classList.add('inhale-active');
+                        }
+                    }
                 }
 
-                alarmTime = timeInput.value;
-                isAlarmSet = true;
-                actionBtn.textContent = "Clear";
-                actionBtn.style.backgroundColor = "#475569";
-                statusText.textContent = `Alarm set for ${alarmTime}`;
-                statusText.style.color = "var(--text-muted)";
-                timeInput.disabled = true;
-            } else {
-                // Clearing the alarm
-                clearAlarmState();
-            }
-        }
-
-        function clearAlarmState() {
-            const timeInput = document.getElementById('alarm-time');
-            const actionBtn = document.getElementById('action-btn');
-            const statusText = document.getElementById('status-text');
-
-            alarmTime = null;
-            isAlarmSet = false;
-            actionBtn.textContent = "Set Alarm";
-            actionBtn.style.backgroundColor = "var(--accent)";
-            statusText.textContent = "No alarm set.";
-            timeInput.disabled = false;
-        }
-
-        function triggerAlarm() {
-            isAlarmSet = false; // Turn off trigger to prevent loops
-            document.getElementById('alarmContainer').classList.add('ringing');
-            document.getElementById('stop-btn').style.display = 'inline-block';
-            document.getElementById('action-btn').style.display = 'none';
-            document.getElementById('status-text').textContent = "Wake up!";
-            document.getElementById('status-text').style.color = "var(--danger)";
-
-            // Start playing the alarm sound
-            startBeeping();
-        }
-
-        function stopAlarm() {
-            // Stop sound
-            if (audioInterval) clearInterval(audioInterval);
-            document.getElementById('alarmContainer').classList.remove('ringing');
-            document.getElementById('stop-btn').style.display = 'none';
-            document.getElementById('action-btn').style.display = 'inline-block';
-            
-            clearAlarmState();
-        }
-
-        // Synthesizes a classic digital alarm beep using Web Audio API
-        function startBeeping() {
-            // Browser security requires user interaction, which we have via clicking "Set Alarm"
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            function beep() {
-                if (!audioCtx) return;
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
-                
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.15);
-            }
-
-            // Standard "beep-beep... beep-beep" pattern
-            audioInterval = setInterval(() => {
-                beep();
-                setTimeout(beep, 200);
+                ticker.textContent = `${appState.breathPhaseRemaining}s`;
             }, 1000);
         }
+
+        function stopBreathingEngine() {
+            if (appState.breathPhaseInterval) {
+                clearInterval(appState.breathPhaseInterval);
+                appState.breathPhaseInterval = null;
+            }
+            const breathingNode = document.getElementById('breathing-node');
+            breathingNode.className = `breath-circle w-32 h-32 rounded-full bg-gradient-to-tr from-sage-500 to-sage-600 shadow-lg shadow-sage-500/20 flex flex-col items-center justify-center text-white select-none`;
+        }
+
+        // Main Countdown Timer controllers
+        function startMasterTimer(totalSeconds) {
+            if (appState.timerInterval) {
+                clearInterval(appState.timerInterval);
+            }
+
+            const progressBar = document.getElementById('timer-progress-bar');
+            progressBar.style.width = '0%';
+
+            appState.timerInterval = setInterval(() => {
+                appState.timerRemaining--;
+
+                // Update visual progress bars
+                const percentage = ((totalSeconds - appState.timerRemaining) / totalSeconds) * 100;
+                progressBar.style.width = `${percentage}%`;
+
+                updateTimerDisplay();
+
+                if (appState.timerRemaining <= 0) {
+                    completePractice();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(appState.timerRemaining / 60);
+            const seconds = appState.timerRemaining % 60;
+            const displayStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timer-display').textContent = displayStr;
+        }
+
+        // Aborting active sessions
+        function abortPractice() {
+            if (appState.timerInterval) {
+                clearInterval(appState.timerInterval);
+                appState.timerInterval = null;
+            }
+            stopBreathingEngine();
+            const progressBar = document.getElementById('timer-progress-bar');
+            progressBar.style.width = '0%';
+        }
+
+        // Complete exercise and move to collection screen
+        function completePractice() {
+            abortPractice();
+
+            // Store completion event first (with undefined feedback)
+            const practice = appState.activePractice;
+            
+            appState.completedLogItem = {
+                practiceId: practice.id,
+                practiceName: practice.name,
+                timestamp: Date.now(),
+                feedback: 'Same' // fallback initial state
+            };
+
+            showView('view-completion');
+        }
+
+        // Submit emotional outcome logs and save to LocalStorage
+        function submitFeedback(outcome) {
+            if (appState.completedLogItem) {
+                appState.completedLogItem.feedback = outcome;
+                
+                // Read historical database
+                let history = [];
+                try {
+                    history = JSON.parse(localStorage.getItem('mental_reset_logs') || '[]');
+                } catch(e) {
+                    history = [];
+                }
+
+                // Inject current logged session to database
+                history.push(appState.completedLogItem);
+                localStorage.setItem('mental_reset_logs', JSON.stringify(history));
+
+                appState.completedLogItem = null; // Flush temp cache
+
+                // Visual Toast Notification trigger
+                showToast(`Session response stored: ${outcome}`);
+            }
+
+            // Immediately route back home smoothly
+            navigateHome();
+        }
+
+        // Dynamic dashboard computation and statistics renderings
+        function renderInsightsPage() {
+            let history = [];
+            try {
+                history = JSON.parse(localStorage.getItem('mental_reset_logs') || '[]');
+            } catch (e) {
+                history = [];
+            }
+
+            // Filter out logs (ensure they fit current spec)
+            const validLogs = history.filter(item => item && item.practiceId);
+
+            // Total session stats counting
+            const totalCount = validLogs.length;
+            document.getElementById('stats-total-sessions').textContent = totalCount;
+
+            const listContainer = document.getElementById('stats-list-container');
+            const mockContainer = document.getElementById('mock-trigger-container');
+
+            if (totalCount === 0) {
+                listContainer.innerHTML = `
+                    <div class="p-4 text-center text-stone-400 text-xs py-8">
+                        Complete your first reset exercise to unlock your statistics.
+                    </div>
+                `;
+                document.getElementById('stats-favorite').textContent = "None yet";
+                mockContainer.classList.remove('hidden');
+                return;
+            }
+
+            // Keep mock container hidden if real data is actively being created
+            mockContainer.classList.add('hidden');
+
+            // Categorize breakdowns count
+            const counts = {};
+            const helps = {}; // tracking "Better" answers
+
+            validLogs.forEach(log => {
+                counts[log.practiceName] = (counts[log.practiceName] || 0) + 1;
+                if (log.feedback === 'Better') {
+                    helps[log.practiceName] = (helps[log.practiceName] || 0) + 1;
+                }
+            });
+
+            // Calculate Best Practice (Most frequent helpful or simply absolute completed frequency fallback)
+            let favoritePractice = "Deep Breathing";
+            let maxVal = -1;
+            Object.entries(counts).forEach(([name, val]) => {
+                if (val > maxVal) {
+                    maxVal = val;
+                    favoritePractice = name;
+                }
+            });
+            document.getElementById('stats-favorite').textContent = favoritePractice;
+
+            // Render list dynamic elements
+            listContainer.innerHTML = '';
+            Object.entries(counts).forEach(([practiceName, count]) => {
+                const helpfulCount = helps[practiceName] || 0;
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "p-4 flex items-center justify-between text-xs";
+                itemDiv.innerHTML = `
+                    <div class="space-y-0.5">
+                        <p class="font-medium text-stone-800">${practiceName}</p>
+                        <p class="text-stone-400 text-[10px]">${helpfulCount} of ${count} marked helpful</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-semibold text-sage-700 bg-sage-50 border border-sage-100 px-2 py-1 rounded">
+                            ${count} ${count === 1 ? 'session' : 'sessions'}
+                        </span>
+                    </div>
+                `;
+                listContainer.appendChild(itemDiv);
+            });
+        }
+
+        // Generates placeholder statistics mockups so user can preview Insights page layout instantly
+        function populateMockData() {
+            const demoLogs = [
+                { practiceId: 'deep-breathing', practiceName: 'Deep Breathing', timestamp: Date.now() - 604800000, feedback: 'Better' },
+                { practiceId: 'deep-breathing', practiceName: 'Deep Breathing', timestamp: Date.now() - 518400000, feedback: 'Better' },
+                { practiceId: 'so-hum', practiceName: 'SO-HUM Mantra', timestamp: Date.now() - 432000000, feedback: 'Same' },
+                { practiceId: 'sky-gazing', practiceName: 'Sky Gazing', timestamp: Date.now() - 345600000, feedback: 'Better' },
+                { practiceId: 'deep-breathing', practiceName: 'Deep Breathing', timestamp: Date.now() - 259200000, feedback: 'Better' },
+                { practiceId: 'walking-meditation', practiceName: 'Walking Meditation', timestamp: Date.now() - 172800000, feedback: 'Better' },
+                { practiceId: 'posture-reset', practiceName: 'Posture Reset', timestamp: Date.now() - 86400000, feedback: 'Same' },
+                { practiceId: 'yoga-nidra', practiceName: 'Yoga Nidra Rest', timestamp: Date.now() - 43200000, feedback: 'Better' }
+            ];
+
+            localStorage.setItem('mental_reset_logs', JSON.stringify(demoLogs));
+            showToast("Mock practice analytics generated successfully!");
+            renderInsightsPage();
+        }
+
+        // Settings triggers
+        function toggleAnimationsSetting() {
+            const isChecked = document.getElementById('settings-animations').checked;
+            appState.animationsEnabled = isChecked;
+            localStorage.setItem('mental_reset_settings_anim', isChecked);
+        }
+
+        function triggerResetAllData() {
+            const doubleCheck = confirm("Are you completely sure you want to delete all local practice records? This cannot be undone.");
+            if (doubleCheck) {
+                localStorage.removeItem('mental_reset_logs');
+                localStorage.removeItem('mental_reset_settings_anim');
+                
+                // Sync settings state control back
+                document.getElementById('settings-animations').checked = true;
+                appState.animationsEnabled = true;
+
+                showToast("All cache databases cleared successfully.");
+                renderInsightsPage();
+                navigateHome();
+            }
+        }
+
+        // Floating Toast utility alert handler (No blocking window alert allowed)
+        function showToast(text) {
+            const toast = document.getElementById('toast-notif');
+            const toastText = document.getElementById('toast-text');
+            toastText.textContent = text;
+            
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+            toast.style.pointerEvents = 'auto';
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                toast.style.pointerEvents = 'none';
+            }, 3000);
+        }
+
+        // Initialization loader on document mounting
+        window.onload = function() {
+            // Restore animation toggles states
+            const cachedAnim = localStorage.getItem('mental_reset_settings_anim');
+            if (cachedAnim !== null) {
+                const isEnabled = cachedAnim === 'true';
+                appState.animationsEnabled = isEnabled;
+                document.getElementById('settings-animations').checked = isEnabled;
+            }
+
+            // Verify network connectivity checks (non-blocking informative HUD update)
+            function updateOnlineStatus() {
+                const isOnline = navigator.onLine;
+                const bubble = document.getElementById('status-bubble');
+                if (isOnline) {
+                    bubble.textContent = "Offline Ready";
+                    bubble.className = "text-[11px] bg-sage-100 text-sage-700 px-2 py-0.5 rounded-full font-medium transition-all duration-300";
+                } else {
+                    bubble.textContent = "Offline Mode";
+                    bubble.className = "text-[11px] bg-stone-200 text-stone-600 px-2 py-0.5 rounded-full font-medium transition-all duration-300";
+                }
+            }
+
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus(); // run initial check
+
+            // Always direct routing defaults
+            switchTab('reset');
+        };
     </script>
 </body>
 </html>
