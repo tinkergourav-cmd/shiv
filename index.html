@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Web Alarm</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .alarm-container {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .clock {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 1.5rem 0;
+            font-family: monospace;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="time"] {
+            background-color: var(--bg-color);
+            border: 2px solid #334155;
+            color: var(--text-main);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-family: monospace;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="time"]:focus {
+            border-color: var(--accent);
+        }
+
+        button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.stop-btn {
+            background-color: var(--danger);
+            display: none;
+        }
+
+        button.stop-btn:hover {
+            background-color: #dc2626;
+        }
+
+        .status {
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            min-height: 1.5rem;
+        }
+
+        /* Subtle pulse animation for when the alarm goes off */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4); }
+            100% { transform: scale(1); }
+        }
+
+        .ringing {
+            animation: pulse 1s infinite;
+            border: 2px solid var(--danger);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="alarm-container" id="alarmContainer">
+        <h1>Alarm Clock</h1>
+        <div class="clock" id="current-time">00:00:00</div>
+
+        <div class="inputs">
+            <input type="time" id="alarm-time" required>
+            <button id="action-btn" onclick="toggleAlarm()">Set Alarm</button>
+        </div>
+
+        <button id="stop-btn" class="stop-btn" onclick="stopAlarm()">Dismiss Alarm</button>
+
+        <div class="status" id="status-text">No alarm set.</div>
+    </div>
+
+    <!-- Web Audio API Synthesizer (No external audio file needed!) -->
+    <script>
+        let alarmTime = null;
+        let alarmTimeout = null;
+        let audioCtx = null;
+        let audioInterval = null;
+        let isAlarmSet = false;
+
+        // Update current time every second
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+
+            // Check if alarm time matches current time (ignoring seconds for exact minute trigger)
+            if (isAlarmSet && alarmTime === `${hours}:${minutes}`) {
+                triggerAlarm();
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock(); // Initial run
+
+        function toggleAlarm() {
+            const timeInput = document.getElementById('alarm-time');
+            const actionBtn = document.getElementById('action-btn');
+            const statusText = document.getElementById('status-text');
+
+            if (!isAlarmSet) {
+                // Setting the alarm
+                if (!timeInput.value) {
+                    statusText.textContent = "Please select a valid time.";
+                    statusText.style.color = "var(--danger)";
+                    return;
+                }
+
+                alarmTime = timeInput.value;
+                isAlarmSet = true;
+                actionBtn.textContent = "Clear";
+                actionBtn.style.backgroundColor = "#475569";
+                statusText.textContent = `Alarm set for ${alarmTime}`;
+                statusText.style.color = "var(--text-muted)";
+                timeInput.disabled = true;
+            } else {
+                // Clearing the alarm
+                clearAlarmState();
+            }
+        }
+
+        function clearAlarmState() {
+            const timeInput = document.getElementById('alarm-time');
+            const actionBtn = document.getElementById('action-btn');
+            const statusText = document.getElementById('status-text');
+
+            alarmTime = null;
+            isAlarmSet = false;
+            actionBtn.textContent = "Set Alarm";
+            actionBtn.style.backgroundColor = "var(--accent)";
+            statusText.textContent = "No alarm set.";
+            timeInput.disabled = false;
+        }
+
+        function triggerAlarm() {
+            isAlarmSet = false; // Turn off trigger to prevent loops
+            document.getElementById('alarmContainer').classList.add('ringing');
+            document.getElementById('stop-btn').style.display = 'inline-block';
+            document.getElementById('action-btn').style.display = 'none';
+            document.getElementById('status-text').textContent = "Wake up!";
+            document.getElementById('status-text').style.color = "var(--danger)";
+
+            // Start playing the alarm sound
+            startBeeping();
+        }
+
+        function stopAlarm() {
+            // Stop sound
+            if (audioInterval) clearInterval(audioInterval);
+            document.getElementById('alarmContainer').classList.remove('ringing');
+            document.getElementById('stop-btn').style.display = 'none';
+            document.getElementById('action-btn').style.display = 'inline-block';
+            
+            clearAlarmState();
+        }
+
+        // Synthesizes a classic digital alarm beep using Web Audio API
+        function startBeeping() {
+            // Browser security requires user interaction, which we have via clicking "Set Alarm"
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            function beep() {
+                if (!audioCtx) return;
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+                
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            }
+
+            // Standard "beep-beep... beep-beep" pattern
+            audioInterval = setInterval(() => {
+                beep();
+                setTimeout(beep, 200);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
