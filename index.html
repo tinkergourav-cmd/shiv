@@ -587,37 +587,38 @@
                     </button>
                 </div>
 
-                <!-- Duration Picker Modal (for Quick Routine) -->
-                <div id="duration-picker-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
-                    <div class="w-full max-w-md bg-white rounded-t-2xl p-5 space-y-4 pb-8">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-serif text-lg text-sage-900 font-medium">Choose Duration</h3>
-                            <button onclick="hideDurationPicker()" class="w-8 h-8 flex items-center justify-center rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 active:scale-90 transition-all">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-3 gap-3">
-                            <button onclick="selectQuickDuration(10)" class="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-stone-100 hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all">
-                                <span class="text-lg font-serif text-sage-900">10</span>
-                                <span class="text-[11px] text-stone-500">minutes</span>
-                            </button>
-                            <button onclick="selectQuickDuration(15)" class="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-stone-100 hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all">
-                                <span class="text-lg font-serif text-sage-900">15</span>
-                                <span class="text-[11px] text-stone-500">minutes</span>
-                            </button>
-                            <button onclick="selectQuickDuration(20)" class="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-stone-100 hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all">
-                                <span class="text-lg font-serif text-sage-900">20</span>
-                                <span class="text-[11px] text-stone-500">minutes</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </div>
 
         </main>
+
+        <!-- Duration Picker Modal (for Quick Routine) - placed outside views so it renders from any view -->
+        <div id="duration-picker-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
+            <div class="w-full max-w-md bg-white rounded-t-2xl p-5 space-y-4 pb-8">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-serif text-lg text-sage-900 font-medium">Choose Duration</h3>
+                    <button onclick="hideDurationPicker()" class="w-8 h-8 flex items-center justify-center rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 active:scale-90 transition-all">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="selectQuickDuration(10)" class="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-stone-100 hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all">
+                        <span class="text-lg font-serif text-sage-900">10</span>
+                        <span class="text-[11px] text-stone-500">minutes</span>
+                    </button>
+                    <button onclick="selectQuickDuration(15)" class="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-stone-100 hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all">
+                        <span class="text-lg font-serif text-sage-900">15</span>
+                        <span class="text-[11px] text-stone-500">minutes</span>
+                    </button>
+                    <button onclick="selectQuickDuration(20)" class="flex flex-col items-center gap-1.5 p-4 rounded-xl border border-stone-100 hover:border-sage-200 hover:bg-sage-50/50 active:scale-[0.98] transition-all">
+                        <span class="text-lg font-serif text-sage-900">20</span>
+                        <span class="text-[11px] text-stone-500">minutes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Fixed Sticky Bottom Navigation Bar -->
         <nav class="absolute bottom-0 left-0 right-0 h-20 bg-white/95 backdrop-blur-md border-t border-stone-100 flex items-center justify-around px-6 z-30">
@@ -645,6 +646,17 @@
 
     <!-- Application Logic and Engine -->
     <script>
+        // HTML escaping helper to prevent XSS when interpolating user input into innerHTML
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // System wide constants for mapping state recommendations
         const STATE_MAPS = {
             'overthinking': {
@@ -865,7 +877,7 @@
             },
             MORNING_QUICK_15: {
                 name: 'Morning Quick (15 min)',
-                totalDuration: 840,
+                totalDuration: 900,
                 steps: [
                     { name: 'Kapalbhati', durationSeconds: 60 },
                     { name: 'Break', durationSeconds: 30 },
@@ -874,12 +886,12 @@
                     { name: 'Anulom Vilom', durationSeconds: 180 },
                     { name: 'Bhramari', durationSeconds: 180 },
                     { name: 'Om Uchharan', durationSeconds: 180 },
-                    { name: 'Dhyan', durationSeconds: 120 }
+                    { name: 'Dhyan', durationSeconds: 180 }
                 ]
             },
             MORNING_QUICK_20: {
                 name: 'Morning Quick (20 min)',
-                totalDuration: 1140,
+                totalDuration: 1200,
                 steps: [
                     { name: 'Kapalbhati', durationSeconds: 60 },
                     { name: 'Break', durationSeconds: 30 },
@@ -888,7 +900,7 @@
                     { name: 'Anulom Vilom', durationSeconds: 300 },
                     { name: 'Bhramari', durationSeconds: 240 },
                     { name: 'Om Uchharan', durationSeconds: 240 },
-                    { name: 'Dhyan', durationSeconds: 180 }
+                    { name: 'Dhyan', durationSeconds: 240 }
                 ]
             },
             MORNING_FULL: {
@@ -1027,7 +1039,7 @@
                             <div class="flex-1 flex items-center justify-between bg-white border border-stone-100 rounded-xl p-3 shadow-sm">
                                 <div class="flex items-center gap-2">
                                     <span class="w-5 h-5 flex items-center justify-center rounded-full bg-sage-50 text-sage-700 text-[10px] font-bold">${index + 1}</span>
-                                    <span class="text-sm font-medium text-stone-800">${step.name}</span>
+                                    <span class="text-sm font-medium text-stone-800">${escapeHtml(step.name)}</span>
                                 </div>
                                 <span class="text-xs text-stone-500 bg-stone-50 px-2 py-0.5 rounded-full">${durationStr}</span>
                             </div>
@@ -1141,7 +1153,7 @@
                 return `
                     <div class="flex items-center justify-between bg-white border border-stone-100 rounded-xl p-3 shadow-sm">
                         <button onclick="loadSavedFlow(${index})" class="flex-1 text-left">
-                            <span class="text-sm font-medium text-stone-800">${flow.name}</span>
+                            <span class="text-sm font-medium text-stone-800">${escapeHtml(flow.name)}</span>
                             <span class="text-[11px] text-stone-400 ml-2">${totalMins} min - ${flow.steps.length} steps</span>
                         </button>
                         <button onclick="deleteSavedFlow(${index})" class="w-7 h-7 flex items-center justify-center rounded-full bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-600 active:scale-90 transition-all ml-2">
@@ -1253,6 +1265,11 @@
                 subCanvases['interactive-breathing'] = true;
             }
 
+            // For break steps, show the yoganidra canvas as a rest visual
+            if (stepNameLower.includes('break')) {
+                subCanvases['interactive-yoganidra'] = true;
+            }
+
             Object.entries(subCanvases).forEach(([canvasId, show]) => {
                 const canvasEl = document.getElementById(canvasId);
                 if (show) {
@@ -1281,6 +1298,12 @@
                 }
             } else {
                 stopBreathingEngine();
+            }
+
+            // For break steps, update the sub-instruction area to indicate rest
+            if (stepNameLower.includes('break')) {
+                stopBreathingEngine();
+                document.getElementById('breath-sub-instruction').textContent = 'Take a moment to rest...';
             }
 
             // Start the timer for this step
