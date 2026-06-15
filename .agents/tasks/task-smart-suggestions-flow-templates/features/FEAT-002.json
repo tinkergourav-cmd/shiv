@@ -1,0 +1,40 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Phase 2 - Flow Templates: Create predefined routine templates (MORNING_QUICK_10, MORNING_QUICK_15, MORNING_QUICK_20, MORNING_FULL, NIGHT_YOG_NIDRA) that can be loaded with one tap from the suggestion card buttons. Selecting a template navigates to a new 'Custom Flow' view showing the sequence of exercises with their durations, which the user can edit and then start. The 'Customize' button opens the same flow editor but empty or with the template pre-loaded for modification. Users can save modified versions to localStorage.",
+  "status": "completed",
+  "steps": [
+    "Step 1: In the JavaScript section, define a FLOW_TEMPLATES constant object containing all templates. Each template has a name, total duration, and an array of steps with {name, durationSeconds} objects. Templates: MORNING_QUICK_10 (Deep Breathing 2min, Brisk Walking 3min, Stretching 2min, Sitting Quietly 3min), MORNING_QUICK_15 (Kapalbhati 1min, Break 30s, Bhastrika 1min, Break 30s, Anulom Vilom 3min, Bhramari 3min, Om Uchharan 3min, Dhyan 2min), MORNING_QUICK_20 (Kapalbhati 1min, Break 30s, Bhastrika 1min, Break 30s, Anulom Vilom 5min, Bhramari 4min, Om Uchharan 4min, Dhyan 3min), MORNING_FULL (Kapalbhati 2min, Break 1min, Bhastrika 2min, Break 1min, Anulom Vilom 5min, Break 30s, Bhramari 5min, Break 30s, Om Uchharan 5min, Break 30s, Dhyan 5min, Break 30s), NIGHT_YOG_NIDRA (Yog Nidra - using existing yoga-nidra practice duration of 15min).",
+    "Step 2: Add a new view div with id='view-flow-editor' in the main content area (after view-settings). This view shows: back button, flow name (editable), list of steps with name and duration, total duration display, buttons to add/remove/reorder steps, a 'Save Flow' button, and a 'Start Flow' button.",
+    "Step 3: Create function loadFlowTemplate(templateId) that populates the flow editor view with the steps from the specified template. Register this in showView's view list so it can be displayed properly.",
+    "Step 4: Create function openFlowEditor(steps, name) that shows the flow editor view with given steps and name. If steps is null/empty, show an empty editor for custom creation.",
+    "Step 5: Wire the Morning suggestion card buttons: 'Quick Routine' shows a sub-menu or directly loads MORNING_QUICK_10 (with option to choose 10/15/20 min variants via a quick picker), 'Full Routine' loads MORNING_FULL template, 'Customize' opens empty flow editor.",
+    "Step 6: Wire the Night suggestion card buttons: 'Start Yog Nidra' loads NIGHT_YOG_NIDRA template and optionally starts it directly, 'Customize' opens empty flow editor.",
+    "Step 7: In the flow editor view, implement 'Start Flow' functionality that begins sequential execution of all steps in the flow. Use the existing practice view (view-practice) with the timer system, but chain exercises automatically - when one timer completes, show a brief transition and start the next step. Add a flow progress indicator showing current step X of Y.",
+    "Step 8: Implement 'Save Flow' functionality that saves the current flow configuration to localStorage under a key like 'mental_reset_saved_flows'. Show saved flows in the flow editor as a list the user can reload.",
+    "Step 9: Add the flow editor step manipulation UI: each step shows its name and duration with a delete button. An 'Add Step' button at the bottom lets user pick from available practices or type a custom activity name and set duration. Steps can be reordered with up/down arrows.",
+    "Step 10: Ensure the flow editor view is included in the showView() function's views array so it properly hides/shows with other views."
+  ],
+  "acceptance_criteria": [
+    "All 5 templates (MORNING_QUICK_10, MORNING_QUICK_15, MORNING_QUICK_20, MORNING_FULL, NIGHT_YOG_NIDRA) are defined with correct exercises and durations matching the spec",
+    "Clicking 'Quick Routine' on morning card shows duration picker (10/15/20 min) or loads default quick template",
+    "Clicking 'Full Routine' loads the MORNING_FULL template into the flow editor",
+    "Clicking 'Start Yog Nidra' on night card loads/starts the night template",
+    "Clicking 'Customize' opens the flow editor (empty or with template pre-loaded)",
+    "Flow editor displays all steps with names and durations",
+    "Users can add, remove steps in the flow editor",
+    "Users can save modified flows to localStorage and reload them",
+    "'Start Flow' begins sequential timer execution through all steps",
+    "Templates are editable before starting",
+    "Existing timer architecture (startMasterTimer, breathing engine) is reused, not replaced"
+  ],
+  "verification": [
+    "Open index.html, verify morning/night suggestion buttons navigate to flow editor with correct template loaded",
+    "Verify flow editor shows correct steps and durations for each template",
+    "Verify Start Flow begins sequential practice execution",
+    "Verify Save Flow persists to localStorage (check in dev tools Application tab)",
+    "Verify no JavaScript console errors"
+  ],
+  "blocked_reason": null,
+  "findings": "Implementation complete. All 5 flow templates defined with correct durations. Flow editor view added to showView() views array. Duration picker modal for Quick Routine shows 10/15/20 min options. Sequential flow execution chains steps using startFlowStepTimer with 2-second transitions between steps. Flow progress indicator shows step X of Y with dot progress bar. Save/load flows persisted to localStorage under mental_reset_saved_flows key. Breathing engine mapped to pranayama-type steps (Kapalbhati, Bhastrika, Anulom Vilom, Bhramari, Om Uchharan) with appropriate breath patterns. No build system - validated JS syntax with Node."
+}
